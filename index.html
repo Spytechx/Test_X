@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Frame Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #frame {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Photo Frame Generator</h1>
+
+  <input type="file" id="fileInput" accept="image/*">
+  <button onclick="generateFrame()">Generate Photo Frame</button>
+
+  <div id="frame">
+    <img src="" alt="Uploaded Image" id="uploadedImage">
+    <img src="" alt="Random Photo Frame" id="frameImage">
+    <br>
+    <label for="format">Choose image format:</label>
+    <select id="format">
+      <option value="png">PNG</option>
+      <option value="jpeg">JPEG</option>
+      <option value="webp">WEBP</option>
+    </select>
+    <br>
+    <a id="downloadLink" href="#" onclick="downloadImage()">Download Framed Photo</a>
+  </div>
+
+  <script>
+    async function getRandomFrame() {
+      const response = await fetch('https://picsum.photos/300/200'); // Adjust the dimensions as needed
+      const frameImageSrc = response.url;
+      return frameImageSrc;
+    }
+
+    function downloadImage() {
+      const format = document.getElementById('format').value;
+      const downloadLink = document.getElementById('downloadLink');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = uploadedImage.width;
+      canvas.height = uploadedImage.height;
+
+      ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+
+      downloadLink.href = canvas.toDataURL(`image/${format}`);
+      downloadLink.download = `framed_photo.${format}`;
+    }
+
+    async function generateFrame() {
+      const fileInput = document.getElementById('fileInput');
+      const frame = document.getElementById('frame');
+      const uploadedImage = document.getElementById('uploadedImage');
+      const frameImage = document.getElementById('frameImage');
+
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+
+        reader.onload = async function (e) {
+          uploadedImage.src = e.target.result;
+
+          const frameImageSrc = await getRandomFrame();
+          frameImage.src = frameImageSrc;
+          frame.style.display = 'block';
+        };
+
+        reader.readAsDataURL(file);
+      }
+    }
+  </script>
+</body>
+</html>
